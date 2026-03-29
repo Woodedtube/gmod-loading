@@ -3,151 +3,97 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reconnect</title>
+<title>Ion Core Loading</title>
 
 <style>
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: linear-gradient(180deg, #042b2d, #0b8f92);
+  background: #07111d;
   color: white;
+  overflow: hidden;
+}
+
+/* SIMPLE VERSION (your full styled one is already in lsm.html) */
+.center {
   text-align: center;
+  margin-top: 15%;
 }
 
-h1 { font-size: 60px; margin-top: 40px; }
-h2 { font-size: 36px; margin-top: 20px; }
+h1 { font-size: 60px; }
+p { font-size: 18px; opacity: 0.8; }
 
-.container {
-  margin-top: 40px;
-}
-
-.btn {
-  display: block;
-  margin: 10px auto;
-  padding: 12px;
-  width: 260px;
-  font-size: 16px;
-  border: none;
-  cursor: pointer;
-}
-
-.olive { background: #9b9950; }
-.purple { background: #7f4fa3; }
-.red { background: #9a4a4a; }
-
-.chat {
+.progress {
   width: 60%;
+  height: 20px;
   margin: 30px auto;
-  background: rgba(0,0,0,0.3);
-  padding: 10px;
-  height: 200px;
-  overflow-y: auto;
+  background: #222;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
-input {
-  width: 60%;
-  padding: 10px;
-  border: none;
+.bar {
+  height: 100%;
+  width: 0%;
+  background: #3046ea;
 }
 </style>
 </head>
 
 <body>
 
-<h1>Reconnect!</h1>
-<p>Never lose the player's attention again.</p>
+<div class="center">
+  <h1>Ion Core Gaming</h1>
+  <p>Loading your experience...</p>
 
-<h2 id="headline">
-The server is changing map, or crashing please hold on...
-</h2>
+  <div class="progress">
+    <div class="bar" id="bar"></div>
+  </div>
 
-<div class="container">
-  <button class="btn olive" id="reconnectStatus">Auto-reconnecting...</button>
-  <button class="btn purple" id="serverStatus">Waiting for server...</button>
-  <button class="btn purple">Map change detected</button>
-  <button class="btn purple" onclick="window.open('https://discord.gg/yourinvite')">
-    Join The Discord
-  </button>
-  <button class="btn red">Disconnect</button>
+  <p id="status">Retrieving server info...</p>
 </div>
-
-<div class="chat" id="chat">
-  Connection opened.
-</div>
-
-<input type="text" placeholder="Enter a message..." id="chatInput" />
 
 <script>
-// =====================
-// MAP + IFRAME HANDLING
-// =====================
+// ==========================
+// MAP SWITCHING SYSTEM
+// ==========================
 const params = new URLSearchParams(window.location.search);
 const map = params.get("map");
 
-// ONLY for your map
+// 🔥 ONLY switch for this map
 if (map === "rp_fortroadside_v1") {
-
-    // Try embedding
-    const iframe = document.createElement("iframe");
-    iframe.src = "https://live.gmod-lsm.com/s/?i=9a60095a";
-    iframe.style = "position:fixed;top:0;left:0;width:100%;height:100%;border:none;";
-    
-    document.body.innerHTML = "";
-    document.body.appendChild(iframe);
-
-    // Fallback if blocked (black screen fix)
-    setTimeout(() => {
-        try {
-            // If iframe failed to load, show message
-            if (!iframe.contentWindow || iframe.contentWindow.length === 0) {
-                document.body.innerHTML = `
-                    <h1>Loading Screen Blocked</h1>
-                    <p>The external loading screen cannot be embedded.</p>
-                    <p>Please use a custom HTML version instead.</p>
-                `;
-            }
-        } catch (e) {
-            // Cross-origin = still fine, means it loaded
-        }
-    }, 3000);
+    window.location.href = "lsm.html";
 }
 
-// =====================
-// RECONNECT TIMER
-// =====================
-let time = 15;
-const reconnectStatus = document.getElementById("reconnectStatus");
+// ==========================
+// FAKE LOADING SYSTEM
+// ==========================
+const bar = document.getElementById("bar");
+const status = document.getElementById("status");
+
+const messages = [
+  "Retrieving server info...",
+  "Downloading workshop content...",
+  "Loading resources...",
+  "Lua Started!"
+];
+
+let progress = 0;
+let msgIndex = 0;
 
 setInterval(() => {
-  reconnectStatus.innerText = "Auto-reconnecting in " + time + "s";
-  if (time > 0) time--;
-}, 1000);
-
-// =====================
-// FAKE SERVER STATUS
-// =====================
-const serverStatus = document.getElementById("serverStatus");
+  if (progress < 100) {
+    progress += Math.random() * 5;
+    if (progress > 100) progress = 100;
+    bar.style.width = progress + "%";
+  }
+}, 200);
 
 setInterval(() => {
-  serverStatus.innerText = 
-    serverStatus.innerText === "Waiting for server..." 
-    ? "Server responding..." 
-    : "Waiting for server...";
+  msgIndex = (msgIndex + 1) % messages.length;
+  status.textContent = messages[msgIndex];
 }, 2500);
 
-// =====================
-// SIMPLE CHAT
-// =====================
-const input = document.getElementById("chatInput");
-const chat = document.getElementById("chat");
-
-input.addEventListener("keydown", function(e) {
-  if (e.key === "Enter") {
-    chat.innerHTML += "<br><b>You:</b> " + input.value;
-    chat.scrollTop = chat.scrollHeight;
-    input.value = "";
-  }
-});
 </script>
 
 </body>
